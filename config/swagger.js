@@ -41,6 +41,231 @@ const swaggerDefinition = {
       }
     },
     schemas: {
+      ErrorItem: {
+        type: 'object',
+        properties: {
+          type: { type: 'string' },
+          value: { type: 'string' },
+          msg: { type: 'string' },
+          path: { type: 'string' },
+          location: { type: 'string' }
+        }
+      },
+      ValidationErrorResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: false },
+          message: { type: 'string', example: 'Validation failed' },
+          errors: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/ErrorItem' }
+          }
+        }
+      },
+      UnauthorizedResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: false },
+          message: { type: 'string', example: 'Unauthorized. Invalid token.' }
+        }
+      },
+      ForbiddenResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: false },
+          message: { type: 'string', example: 'Access denied. You are not a member of this group.' }
+        }
+      },
+      NotFoundResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: false },
+          message: { type: 'string', example: 'Group not found' }
+        }
+      },
+      ConflictResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: false },
+          message: { type: 'string', example: 'Email already registered' }
+        }
+      },
+      UserPublic: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '665f6c8f7e4f921f1d2a1234' },
+          name: { type: 'string', example: 'John Doe' },
+          email: { type: 'string', example: 'john@example.com' }
+        }
+      },
+      UserRef: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string', example: '665f6c8f7e4f921f1d2a1234' },
+          name: { type: 'string', example: 'John Doe' },
+          email: { type: 'string', example: 'john@example.com' }
+        }
+      },
+      AuthSuccessResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          message: { type: 'string', example: 'Login successful' },
+          data: {
+            type: 'object',
+            properties: {
+              user: { $ref: '#/components/schemas/UserPublic' },
+              token: { type: 'string' }
+            }
+          }
+        }
+      },
+      Group: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          name: { type: 'string' },
+          createdBy: { $ref: '#/components/schemas/UserRef' },
+          members: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/UserRef' }
+          },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      },
+      GroupListResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          count: { type: 'integer', example: 1 },
+          data: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Group' }
+          }
+        }
+      },
+      GroupSingleResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'object',
+            properties: {
+              group: { $ref: '#/components/schemas/Group' },
+              balances: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    fromUser: { type: 'string' },
+                    toUser: { type: 'string' },
+                    amount: { type: 'number' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      GroupBalancesResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                fromUser: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    name: { type: 'string' }
+                  }
+                },
+                toUser: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    name: { type: 'string' }
+                  }
+                },
+                amount: { type: 'number' }
+              }
+            }
+          }
+        }
+      },
+      Expense: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          groupId: {
+            type: 'object',
+            properties: {
+              _id: { type: 'string' },
+              name: { type: 'string' }
+            }
+          },
+          description: { type: 'string' },
+          amount: { type: 'number' },
+          paidBy: { $ref: '#/components/schemas/UserRef' },
+          participants: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/UserRef' }
+          },
+          splitType: { type: 'string', example: 'equal' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      },
+      CreateExpenseResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          message: { type: 'string', example: 'Expense added successfully' },
+          data: { $ref: '#/components/schemas/Expense' }
+        }
+      },
+      ExpenseListResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          pagination: {
+            type: 'object',
+            properties: {
+              page: { type: 'integer', example: 1 },
+              limit: { type: 'integer', example: 10 },
+              total: { type: 'integer', example: 5 },
+              totalPages: { type: 'integer', example: 1 }
+            }
+          },
+          data: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Expense' }
+          }
+        }
+      },
+      SettlementResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          message: { type: 'string', example: 'Payment marked as settled' },
+          data: {
+            type: 'object',
+            properties: {
+              _id: { type: 'string' },
+              groupId: { $ref: '#/components/schemas/UserRef' },
+              fromUser: { $ref: '#/components/schemas/UserRef' },
+              toUser: { $ref: '#/components/schemas/UserRef' },
+              amount: { type: 'number' },
+              status: { type: 'string', example: 'settled' },
+              createdAt: { type: 'string', format: 'date-time' }
+            }
+          }
+        }
+      },
       RegisterRequest: {
         type: 'object',
         required: ['name', 'email', 'password'],
@@ -103,6 +328,40 @@ const swaggerDefinition = {
           amount: { type: 'number', example: 500 }
         }
       }
+    },
+    responses: {
+      BadRequest: {
+        description: 'Invalid input/validation failure',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ValidationErrorResponse' }
+          }
+        }
+      },
+      Unauthorized: {
+        description: 'Unauthorized access/token issue',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/UnauthorizedResponse' }
+          }
+        }
+      },
+      Forbidden: {
+        description: 'Forbidden for current user',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ForbiddenResponse' }
+          }
+        }
+      },
+      NotFound: {
+        description: 'Resource not found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/NotFoundResponse' }
+          }
+        }
+      }
     }
   },
   paths: {
@@ -112,7 +371,20 @@ const swaggerDefinition = {
         tags: ['Health'],
         security: [],
         responses: {
-          200: { description: 'API is healthy' }
+          200: {
+            description: 'API is healthy',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'SplitSync API is running' }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -128,8 +400,23 @@ const swaggerDefinition = {
           }
         },
         responses: {
-          201: { description: 'Registered successfully' },
-          409: { description: 'Email already registered' }
+          201: {
+            description: 'Registered successfully',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/AuthSuccessResponse' }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          409: {
+            description: 'Conflict',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ConflictResponse' }
+              }
+            }
+          }
         }
       }
     },
@@ -146,8 +433,16 @@ const swaggerDefinition = {
           }
         },
         responses: {
-          200: { description: 'Login success' },
-          401: { description: 'Invalid credentials' }
+          200: {
+            description: 'Login success',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/AuthSuccessResponse' }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' }
         }
       }
     },
@@ -163,8 +458,25 @@ const swaggerDefinition = {
           }
         },
         responses: {
-          201: { description: 'Group created' },
-          401: { description: 'Unauthorized' }
+          201: {
+            description: 'Group created',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Group created successfully' },
+                    data: { $ref: '#/components/schemas/Group' }
+                  }
+                }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' }
         }
       },
       get: {
@@ -172,8 +484,18 @@ const swaggerDefinition = {
         tags: ['Groups'],
         parameters: [{ $ref: '#/components/parameters/AuthToken' }],
         responses: {
-          200: { description: 'Groups list' },
-          401: { description: 'Unauthorized' }
+          200: {
+            description: 'Groups list',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/GroupListResponse' }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' }
         }
       }
     },
@@ -191,8 +513,18 @@ const swaggerDefinition = {
           }
         ],
         responses: {
-          200: { description: 'Group details with balances' },
-          404: { description: 'Group not found' }
+          200: {
+            description: 'Group details with balances',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/GroupSingleResponse' }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' }
         }
       }
     },
@@ -216,8 +548,25 @@ const swaggerDefinition = {
           }
         },
         responses: {
-          200: { description: 'Member added' },
-          409: { description: 'Already member' }
+          200: {
+            description: 'Member added',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Member added successfully' },
+                    data: { $ref: '#/components/schemas/Group' }
+                  }
+                }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' }
         }
       }
     },
@@ -235,7 +584,18 @@ const swaggerDefinition = {
           }
         ],
         responses: {
-          200: { description: 'Balances fetched' }
+          200: {
+            description: 'Balances fetched',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/GroupBalancesResponse' }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' }
         }
       }
     },
@@ -251,7 +611,18 @@ const swaggerDefinition = {
           }
         },
         responses: {
-          201: { description: 'Expense created' }
+          201: {
+            description: 'Expense created',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/CreateExpenseResponse' }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' }
         }
       }
     },
@@ -281,7 +652,18 @@ const swaggerDefinition = {
           }
         ],
         responses: {
-          200: { description: 'Expenses fetched' }
+          200: {
+            description: 'Expenses fetched',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ExpenseListResponse' }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' }
         }
       }
     },
@@ -297,7 +679,18 @@ const swaggerDefinition = {
           }
         },
         responses: {
-          201: { description: 'Payment settled' }
+          201: {
+            description: 'Payment settled',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/SettlementResponse' }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' }
         }
       }
     }
