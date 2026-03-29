@@ -65,7 +65,7 @@ Swagger UI:
 
 1. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 
 2. Configure environment:
@@ -81,13 +81,21 @@ Swagger UI:
 
 3. Start dev server:
    ```bash
-   npm run dev
+   pnpm run dev
    ```
 
 4. Start production server:
    ```bash
-   npm start
+   pnpm start
    ```
+
+## Swagger Usage
+
+- Open Swagger at `http://localhost:5000/api/docs`
+- Call `POST /auth/login` first to get JWT
+- Click `Authorize` (top-right)
+- Enter token as `Bearer <your_token>`
+- Now test protected endpoints (`/groups`, `/expenses`, `/settle`)
 
 ## Notes
 
@@ -112,8 +120,8 @@ Recommended path for new developers:
 ## Deployment
 
 This backend is ready to deploy to Render or Railway:
-- Build command: `npm install`
-- Start command: `npm start`
+- Build command: `pnpm install --frozen-lockfile`
+- Start command: `pnpm start`
 - Add all `.env` variables in the platform dashboard.
 
 ### VPS / Custom Domain Notes

@@ -9,7 +9,7 @@
 ## Installation
 
 ```bash
-npm install
+pnpm install
 ```
 
 ## Environment Configuration
@@ -34,13 +34,13 @@ Required keys:
 Development mode:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Production mode:
 
 ```bash
-npm start
+pnpm start
 ```
 
 ## Health Check

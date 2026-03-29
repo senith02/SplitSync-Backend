@@ -9,8 +9,8 @@
 
 ### 2. Configure commands
 
-- Build command: `npm install`
-- Start command: `npm start`
+- Build command: `pnpm install --frozen-lockfile`
+- Start command: `pnpm start`
 
 ### 3. Add environment variables
 

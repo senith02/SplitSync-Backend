@@ -6,6 +6,11 @@ Swagger UI: `http://localhost:5000/api/docs`
 
 Swagger JSON: `http://localhost:5000/api/docs.json`
 
+For protected endpoints:
+1. Login via `POST /auth/login`
+2. Click `Authorize` in Swagger UI
+3. Paste `Bearer <token>`
+
 Auth header for protected routes:
 
 `Authorization: Bearer <jwt_token>`

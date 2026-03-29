@@ -33,7 +33,16 @@ const apiLimiter = rateLimit({
 });
 
 app.use('/api', apiLimiter);
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(
+  '/api/docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true
+    }
+  })
+);
 app.get('/api/docs.json', (req, res) => {
   res.status(200).json(swaggerSpec);
 });

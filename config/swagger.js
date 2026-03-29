@@ -11,19 +11,33 @@ const buildServers = () => {
 };
 
 const swaggerDefinition = {
-  openapi: '3.0.0',
+  openapi: '3.1.1',
   info: {
     title: 'SplitSync Backend API',
     version: '1.0.0',
     description: 'REST API for SplitSync group expense management'
   },
   servers: buildServers(),
+  security: [{ bearerAuth: [] }],
   components: {
     securitySchemes: {
       bearerAuth: {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT'
+      }
+    },
+    parameters: {
+      AuthToken: {
+        name: 'Authorization',
+        in: 'header',
+        required: true,
+        description: 'JWT access token. Use format: Bearer <token>',
+        schema: {
+          type: 'string',
+          example:
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+        }
       }
     },
     schemas: {
@@ -96,6 +110,7 @@ const swaggerDefinition = {
       get: {
         summary: 'API health check',
         tags: ['Health'],
+        security: [],
         responses: {
           200: { description: 'API is healthy' }
         }
@@ -105,6 +120,7 @@ const swaggerDefinition = {
       post: {
         summary: 'Register user',
         tags: ['Auth'],
+        security: [],
         requestBody: {
           required: true,
           content: {
@@ -121,6 +137,8 @@ const swaggerDefinition = {
       post: {
         summary: 'Login user',
         tags: ['Auth'],
+        description: 'Use this endpoint first, then click Authorize and paste token as: Bearer <token>',
+        security: [],
         requestBody: {
           required: true,
           content: {
@@ -137,7 +155,7 @@ const swaggerDefinition = {
       post: {
         summary: 'Create group',
         tags: ['Groups'],
-        security: [{ bearerAuth: [] }],
+        parameters: [{ $ref: '#/components/parameters/AuthToken' }],
         requestBody: {
           required: true,
           content: {
@@ -152,7 +170,7 @@ const swaggerDefinition = {
       get: {
         summary: 'Get current user groups',
         tags: ['Groups'],
-        security: [{ bearerAuth: [] }],
+        parameters: [{ $ref: '#/components/parameters/AuthToken' }],
         responses: {
           200: { description: 'Groups list' },
           401: { description: 'Unauthorized' }
@@ -163,8 +181,8 @@ const swaggerDefinition = {
       get: {
         summary: 'Get group details by ID',
         tags: ['Groups'],
-        security: [{ bearerAuth: [] }],
         parameters: [
+          { $ref: '#/components/parameters/AuthToken' },
           {
             name: 'id',
             in: 'path',
@@ -182,8 +200,8 @@ const swaggerDefinition = {
       post: {
         summary: 'Add member to group',
         tags: ['Groups'],
-        security: [{ bearerAuth: [] }],
         parameters: [
+          { $ref: '#/components/parameters/AuthToken' },
           {
             name: 'id',
             in: 'path',
@@ -207,8 +225,8 @@ const swaggerDefinition = {
       get: {
         summary: 'Get group simplified balances',
         tags: ['Groups'],
-        security: [{ bearerAuth: [] }],
         parameters: [
+          { $ref: '#/components/parameters/AuthToken' },
           {
             name: 'id',
             in: 'path',
@@ -225,7 +243,7 @@ const swaggerDefinition = {
       post: {
         summary: 'Create expense',
         tags: ['Expenses'],
-        security: [{ bearerAuth: [] }],
+        parameters: [{ $ref: '#/components/parameters/AuthToken' }],
         requestBody: {
           required: true,
           content: {
@@ -241,8 +259,8 @@ const swaggerDefinition = {
       get: {
         summary: 'Get group expenses',
         tags: ['Expenses'],
-        security: [{ bearerAuth: [] }],
         parameters: [
+          { $ref: '#/components/parameters/AuthToken' },
           {
             name: 'groupId',
             in: 'path',
@@ -271,7 +289,7 @@ const swaggerDefinition = {
       post: {
         summary: 'Record settlement payment',
         tags: ['Settlement'],
-        security: [{ bearerAuth: [] }],
+        parameters: [{ $ref: '#/components/parameters/AuthToken' }],
         requestBody: {
           required: true,
           content: {
