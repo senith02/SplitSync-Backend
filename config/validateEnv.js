@@ -1,12 +1,10 @@
 const hasPlaceholder = (value = '') => {
   const lowered = String(value).toLowerCase();
   return (
-    lowered.includes('<') ||
+    /<[^>]+>/.test(lowered) ||
     lowered.includes('replace_with') ||
     lowered.includes('your_') ||
-    lowered.includes('cluster-url') ||
-    lowered.includes('username') ||
-    lowered.includes('password')
+    lowered.includes('cluster-url')
   );
 };
 

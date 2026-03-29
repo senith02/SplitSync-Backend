@@ -3,11 +3,13 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const swaggerUi = require('swagger-ui-express');
 
 const authRoutes = require('./routes/authRoutes');
 const groupRoutes = require('./routes/groupRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const settlementRoutes = require('./routes/settlementRoutes');
+const swaggerSpec = require('./config/swagger');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
@@ -31,6 +33,18 @@ const apiLimiter = rateLimit({
 });
 
 app.use('/api', apiLimiter);
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/api/docs.json', (req, res) => {
+  res.status(200).json(swaggerSpec);
+});
+
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'SplitSync server is running',
+    health: '/api/health'
+  });
+});
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true, message: 'SplitSync API is running' });

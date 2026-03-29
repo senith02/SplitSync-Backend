@@ -30,6 +30,14 @@ splitsync-backend/
 
 `http://localhost:5000/api`
 
+Root health URL:
+
+`http://localhost:5000/`
+
+Swagger UI:
+
+`http://localhost:5000/api/docs`
+
 ## Endpoints
 
 ### Auth
@@ -67,6 +75,9 @@ splitsync-backend/
    ```bash
    copy .env.example .env
    ```
+    - optional hosting variables:
+       - `HOST` for bind address (usually `0.0.0.0` on VPS)
+       - `PUBLIC_BASE_URL` for your domain (e.g., `https://mydomain.me`)
 
 3. Start dev server:
    ```bash
@@ -85,6 +96,7 @@ splitsync-backend/
 - Expenses use equal split for MVP.
 - Group balances are simplified to who owes whom.
 - Expense list supports pagination via `page` and `limit` query params.
+- Swagger JSON is available at `/api/docs.json`.
 
 ## Documentation
 
@@ -103,3 +115,11 @@ This backend is ready to deploy to Render or Railway:
 - Build command: `npm install`
 - Start command: `npm start`
 - Add all `.env` variables in the platform dashboard.
+
+### VPS / Custom Domain Notes
+
+- You do not need to hardcode your domain for Express to run.
+- For VPS, set `HOST=0.0.0.0` so the app accepts external traffic.
+- Point your domain DNS (A/AAAA record) to VPS IP.
+- Use Nginx/Caddy as reverse proxy and SSL terminator.
+- Set `PUBLIC_BASE_URL=https://mydomain.me` for accurate startup/docs URLs.

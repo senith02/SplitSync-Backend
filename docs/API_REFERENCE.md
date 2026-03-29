@@ -2,6 +2,10 @@
 
 Base URL: `http://localhost:5000/api`
 
+Swagger UI: `http://localhost:5000/api/docs`
+
+Swagger JSON: `http://localhost:5000/api/docs.json`
+
 Auth header for protected routes:
 
 `Authorization: Bearer <jwt_token>`
