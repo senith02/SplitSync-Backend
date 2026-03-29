@@ -407,15 +407,6 @@ const swaggerDefinition = {
                 schema: { $ref: '#/components/schemas/AuthSuccessResponse' }
               }
             }
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          409: {
-            description: 'Conflict',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ConflictResponse' }
-              }
-            }
           }
         }
       }
@@ -440,9 +431,7 @@ const swaggerDefinition = {
                 schema: { $ref: '#/components/schemas/AuthSuccessResponse' }
               }
             }
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          401: { $ref: '#/components/responses/Unauthorized' }
+          }
         }
       }
     },
@@ -472,11 +461,7 @@ const swaggerDefinition = {
                 }
               }
             }
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          401: { $ref: '#/components/responses/Unauthorized' },
-          403: { $ref: '#/components/responses/Forbidden' },
-          404: { $ref: '#/components/responses/NotFound' }
+          }
         }
       },
       get: {
@@ -491,11 +476,7 @@ const swaggerDefinition = {
                 schema: { $ref: '#/components/schemas/GroupListResponse' }
               }
             }
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          401: { $ref: '#/components/responses/Unauthorized' },
-          403: { $ref: '#/components/responses/Forbidden' },
-          404: { $ref: '#/components/responses/NotFound' }
+          }
         }
       }
     },
@@ -520,11 +501,7 @@ const swaggerDefinition = {
                 schema: { $ref: '#/components/schemas/GroupSingleResponse' }
               }
             }
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          401: { $ref: '#/components/responses/Unauthorized' },
-          403: { $ref: '#/components/responses/Forbidden' },
-          404: { $ref: '#/components/responses/NotFound' }
+          }
         }
       }
     },
@@ -562,11 +539,7 @@ const swaggerDefinition = {
                 }
               }
             }
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          401: { $ref: '#/components/responses/Unauthorized' },
-          403: { $ref: '#/components/responses/Forbidden' },
-          404: { $ref: '#/components/responses/NotFound' }
+          }
         }
       }
     },
@@ -591,11 +564,7 @@ const swaggerDefinition = {
                 schema: { $ref: '#/components/schemas/GroupBalancesResponse' }
               }
             }
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          401: { $ref: '#/components/responses/Unauthorized' },
-          403: { $ref: '#/components/responses/Forbidden' },
-          404: { $ref: '#/components/responses/NotFound' }
+          }
         }
       }
     },
@@ -618,11 +587,7 @@ const swaggerDefinition = {
                 schema: { $ref: '#/components/schemas/CreateExpenseResponse' }
               }
             }
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          401: { $ref: '#/components/responses/Unauthorized' },
-          403: { $ref: '#/components/responses/Forbidden' },
-          404: { $ref: '#/components/responses/NotFound' }
+          }
         }
       }
     },
@@ -659,11 +624,7 @@ const swaggerDefinition = {
                 schema: { $ref: '#/components/schemas/ExpenseListResponse' }
               }
             }
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          401: { $ref: '#/components/responses/Unauthorized' },
-          403: { $ref: '#/components/responses/Forbidden' },
-          404: { $ref: '#/components/responses/NotFound' }
+          }
         }
       }
     },
@@ -686,11 +647,7 @@ const swaggerDefinition = {
                 schema: { $ref: '#/components/schemas/SettlementResponse' }
               }
             }
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          401: { $ref: '#/components/responses/Unauthorized' },
-          403: { $ref: '#/components/responses/Forbidden' },
-          404: { $ref: '#/components/responses/NotFound' }
+          }
         }
       }
     }
