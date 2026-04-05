@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const groupRoutes = require('./routes/groupRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const settlementRoutes = require('./routes/settlementRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const swaggerSpec = require('./config/swagger');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
@@ -63,6 +64,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/settle', settlementRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

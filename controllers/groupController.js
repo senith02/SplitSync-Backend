@@ -5,6 +5,29 @@ const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const calculateBalances = require('../utils/balanceCalculator');
 
+const round = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
+
+const summarizeUserPosition = (balances, userId) => {
+  let youAreOwed = 0;
+  let youOwe = 0;
+
+  balances.forEach((entry) => {
+    if (entry.toUser === userId) {
+      youAreOwed = round(youAreOwed + entry.amount);
+    }
+
+    if (entry.fromUser === userId) {
+      youOwe = round(youOwe + entry.amount);
+    }
+  });
+
+  return {
+    youAreOwed,
+    youOwe,
+    totalBalance: round(youAreOwed - youOwe)
+  };
+};
+
 const createGroup = asyncHandler(async (req, res) => {
   const { name, members = [] } = req.body;
   const currentUserId = req.user._id.toString();
@@ -46,6 +69,90 @@ const getGroups = asyncHandler(async (req, res) => {
     success: true,
     count: groups.length,
     data: groups
+  });
+});
+
+const getGroupsOverview = asyncHandler(async (req, res) => {
+  const userId = req.user._id.toString();
+
+  const groups = await Group.find({ members: req.user._id }).select('_id name members createdAt').sort({ createdAt: -1 }).lean();
+
+  if (!groups.length) {
+    return res.status(200).json({
+      success: true,
+      data: {
+        summary: {
+          totalGroups: 0,
+          totalGroupBalance: 0,
+          youAreOwed: 0,
+          youOwe: 0,
+          totalExpenses: 0
+        },
+        groups: []
+      }
+    });
+  }
+
+  const groupIds = groups.map((group) => group._id);
+  const expenses = await Expense.find({ groupId: { $in: groupIds } })
+    .select('groupId amount paidBy participants')
+    .lean();
+
+  const expensesByGroup = new Map();
+  const totalsByGroup = new Map();
+
+  expenses.forEach((expense) => {
+    const groupId = expense.groupId.toString();
+
+    const groupExpenses = expensesByGroup.get(groupId) || [];
+    groupExpenses.push(expense);
+    expensesByGroup.set(groupId, groupExpenses);
+
+    totalsByGroup.set(groupId, round((totalsByGroup.get(groupId) || 0) + expense.amount));
+  });
+
+  let totalGroupBalance = 0;
+  let totalYouAreOwed = 0;
+  let totalYouOwe = 0;
+  let totalExpenses = 0;
+
+  const groupSummaries = groups.map((group) => {
+    const groupId = group._id.toString();
+    const groupExpenses = expensesByGroup.get(groupId) || [];
+
+    const balances = calculateBalances(groupExpenses);
+    const position = summarizeUserPosition(balances, userId);
+
+    const groupTotalExpenses = round(totalsByGroup.get(groupId) || 0);
+
+    totalGroupBalance = round(totalGroupBalance + position.totalBalance);
+    totalYouAreOwed = round(totalYouAreOwed + position.youAreOwed);
+    totalYouOwe = round(totalYouOwe + position.youOwe);
+    totalExpenses = round(totalExpenses + groupTotalExpenses);
+
+    return {
+      groupId: group._id,
+      name: group.name,
+      memberCount: group.members.length,
+      totalExpenses: groupTotalExpenses,
+      totalBalance: position.totalBalance,
+      youAreOwed: position.youAreOwed,
+      youOwe: position.youOwe
+    };
+  });
+
+  return res.status(200).json({
+    success: true,
+    data: {
+      summary: {
+        totalGroups: groups.length,
+        totalGroupBalance,
+        youAreOwed: totalYouAreOwed,
+        youOwe: totalYouOwe,
+        totalExpenses
+      },
+      groups: groupSummaries
+    }
   });
 });
 
@@ -198,6 +305,7 @@ const getGroupBalances = asyncHandler(async (req, res) => {
 module.exports = {
   createGroup,
   getGroups,
+  getGroupsOverview,
   getGroupById,
   addMember,
   getGroupBalances

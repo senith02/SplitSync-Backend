@@ -61,6 +61,13 @@ Body:
 ### GET /groups
 Get all groups where current user is a member.
 
+### GET /groups/overview
+Get groups view data for the current user.
+
+Returns:
+- summary totals for all user groups
+- per-group totals including `totalExpenses`, `totalBalance`, `youAreOwed`, `youOwe`
+
 ### GET /groups/:id
 Get group details and computed balances.
 
@@ -110,6 +117,80 @@ Body:
   "fromUser": "<userId>",
   "toUser": "<userId>",
   "amount": 500
+}
+```
+
+---
+
+## Dashboard
+
+### GET /dashboard?months=6&activityLimit=10
+Get dashboard overview for the current user.
+
+Query params:
+- `months` (optional): monthly insight range, from 1 to 12 (default 6)
+- `activityLimit` (optional): max recent activity records, from 1 to 50 (default 10)
+
+Response data includes:
+- `summary`: `totalBalance`, `youAreOwed`, `youOwe`
+- `monthlyInsights`: bar-chart friendly monthly metrics
+- `recentActivities`: latest mixed expense + settlement activity feed
+
+Example response shape:
+
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "<userId>",
+      "name": "Dev Tester",
+      "email": "dev.user@splitsync.local"
+    },
+    "summary": {
+      "totalBalance": 2450,
+      "youAreOwed": 5600,
+      "youOwe": 3150
+    },
+    "monthlyInsights": [
+      {
+        "monthKey": "2026-04",
+        "monthLabel": "Apr 2026",
+        "totalPaid": 15000,
+        "totalShare": 3750,
+        "settlementsPaid": 0,
+        "settlementsReceived": 2000,
+        "involvedExpenseAmount": 15000,
+        "expenseCount": 1,
+        "netBalance": 13250
+      }
+    ],
+    "recentActivities": [
+      {
+        "id": "<activityId>",
+        "type": "settlement",
+        "activityType": "settlement_recorded",
+        "direction": "you_received",
+        "amount": 2000,
+        "status": "settled",
+        "group": {
+          "id": "<groupId>",
+          "name": "DEV - Gym Buddies"
+        },
+        "fromUser": {
+          "id": "<userId>",
+          "name": "Sahan Wickramage",
+          "email": "sahan.peer@splitsync.local"
+        },
+        "toUser": {
+          "id": "<userId>",
+          "name": "Dev Tester",
+          "email": "dev.user@splitsync.local"
+        },
+        "createdAt": "2026-04-01T12:00:00.000Z"
+      }
+    ]
+  }
 }
 ```
 

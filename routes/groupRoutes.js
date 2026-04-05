@@ -4,6 +4,7 @@ const { body, param } = require('express-validator');
 const {
   createGroup,
   getGroups,
+  getGroupsOverview,
   getGroupById,
   addMember,
   getGroupBalances
@@ -26,6 +27,8 @@ router.post(
 );
 
 router.get('/', getGroups);
+
+router.get('/overview', getGroupsOverview);
 
 router.get('/:id', [param('id').isMongoId().withMessage('Valid group ID is required')], validateRequest, getGroupById);
 
