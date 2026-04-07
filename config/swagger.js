@@ -3,11 +3,16 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const buildServers = () => {
   const publicBaseUrl = process.env.PUBLIC_BASE_URL;
   if (publicBaseUrl) {
-    return [{ url: `${publicBaseUrl}/api`, description: 'Configured public API URL' }];
+    // Ensure no trailing slash
+    const base = publicBaseUrl.replace(/\/+$/g, '');
+    return [{ url: `${base}/api`, description: 'Configured public API URL' }];
   }
 
-  const port = process.env.PORT || 5000;
-  return [{ url: `http://localhost:${port}/api`, description: 'Local development' }];
+  // Use a relative server path when PUBLIC_BASE_URL is not set so the
+  // Swagger UI will load using the current request's scheme/host. This
+  // prevents mixed-content issues when the app is served over HTTPS but
+  // the spec contains an http:// URL.
+  return [{ url: '/api', description: 'Current host' }];
 };
 
 const swaggerDefinition = {
