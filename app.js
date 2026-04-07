@@ -9,10 +9,14 @@ const authRoutes = require('./routes/authRoutes');
 const groupRoutes = require('./routes/groupRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const settlementRoutes = require('./routes/settlementRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const swaggerSpec = require('./config/swagger');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
+
+// Trust proxy (Heroku, proxies) so req.protocol and secure detection work
+app.set('trust proxy', 1);
 
 app.use(helmet());
 app.use(cors());
@@ -21,6 +25,16 @@ app.use(express.urlencoded({ extended: false }));
 
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
+}
+
+// Redirect HTTP -> HTTPS in production (Heroku terminates TLS at the router)
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(`https://${req.headers.host}${req.url}`);
+    }
+    next();
+  });
 }
 
 const apiLimiter = rateLimit({
@@ -63,6 +77,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/settle', settlementRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

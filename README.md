@@ -47,6 +47,7 @@ Swagger UI:
 ### Groups
 - `POST /groups`
 - `GET /groups`
+- `GET /groups/overview`
 - `GET /groups/:id`
 - `POST /groups/:id/add-member`
 - `GET /groups/:id/balances`
@@ -57,6 +58,9 @@ Swagger UI:
 
 ### Settlement
 - `POST /settle`
+
+### Dashboard
+- `GET /dashboard?months=6&activityLimit=10`
 
 ### Health
 - `GET /health`
@@ -87,6 +91,11 @@ Swagger UI:
 4. Start production server:
    ```bash
    pnpm start
+   ```
+
+5. Seed development data (recommended for frontend testing):
+   ```bash
+   pnpm run seed:dev
    ```
 
 ## Swagger Usage

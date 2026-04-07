@@ -197,6 +197,102 @@ const swaggerDefinition = {
           }
         }
       },
+      GroupOverviewResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'object',
+            properties: {
+              summary: {
+                type: 'object',
+                properties: {
+                  totalGroups: { type: 'integer', example: 5 },
+                  totalGroupBalance: { type: 'number', example: 2450 },
+                  youAreOwed: { type: 'number', example: 5600 },
+                  youOwe: { type: 'number', example: 3150 },
+                  totalExpenses: { type: 'number', example: 68400 }
+                }
+              },
+              groups: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    groupId: { type: 'string' },
+                    name: { type: 'string', example: 'DEV - Gym Buddies' },
+                    memberCount: { type: 'integer', example: 4 },
+                    totalExpenses: { type: 'number', example: 15000 },
+                    totalBalance: { type: 'number', example: 7500 },
+                    youAreOwed: { type: 'number', example: 7500 },
+                    youOwe: { type: 'number', example: 0 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      DashboardOverviewResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'object',
+            properties: {
+              user: { $ref: '#/components/schemas/UserPublic' },
+              summary: {
+                type: 'object',
+                properties: {
+                  totalBalance: { type: 'number', example: 2450 },
+                  youAreOwed: { type: 'number', example: 5600 },
+                  youOwe: { type: 'number', example: 3150 }
+                }
+              },
+              monthlyInsights: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    monthKey: { type: 'string', example: '2026-04' },
+                    monthLabel: { type: 'string', example: 'Apr 2026' },
+                    totalPaid: { type: 'number', example: 15000 },
+                    totalShare: { type: 'number', example: 3750 },
+                    settlementsPaid: { type: 'number', example: 0 },
+                    settlementsReceived: { type: 'number', example: 2000 },
+                    involvedExpenseAmount: { type: 'number', example: 15000 },
+                    expenseCount: { type: 'integer', example: 1 },
+                    netBalance: { type: 'number', example: 13250 }
+                  }
+                }
+              },
+              recentActivities: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    type: { type: 'string', enum: ['expense', 'settlement'] },
+                    activityType: { type: 'string' },
+                    direction: { type: 'string', example: 'you_paid' },
+                    amount: { type: 'number' },
+                    description: { type: 'string', nullable: true },
+                    status: { type: 'string', nullable: true },
+                    group: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' }
+                      }
+                    },
+                    createdAt: { type: 'string', format: 'date-time' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       Expense: {
         type: 'object',
         properties: {
@@ -480,6 +576,23 @@ const swaggerDefinition = {
         }
       }
     },
+    '/groups/overview': {
+      get: {
+        summary: 'Get current user groups overview with totals',
+        tags: ['Groups'],
+        parameters: [{ $ref: '#/components/parameters/AuthToken' }],
+        responses: {
+          200: {
+            description: 'Groups overview fetched',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/GroupOverviewResponse' }
+              }
+            }
+          }
+        }
+      }
+    },
     '/groups/{id}': {
       get: {
         summary: 'Get group details by ID',
@@ -622,6 +735,37 @@ const swaggerDefinition = {
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/ExpenseListResponse' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/dashboard': {
+      get: {
+        summary: 'Get user dashboard overview',
+        tags: ['Dashboard'],
+        parameters: [
+          { $ref: '#/components/parameters/AuthToken' },
+          {
+            name: 'months',
+            in: 'query',
+            required: false,
+            schema: { type: 'integer', minimum: 1, maximum: 12 }
+          },
+          {
+            name: 'activityLimit',
+            in: 'query',
+            required: false,
+            schema: { type: 'integer', minimum: 1, maximum: 50 }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'Dashboard data fetched',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/DashboardOverviewResponse' }
               }
             }
           }
