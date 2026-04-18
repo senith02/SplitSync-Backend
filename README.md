@@ -48,6 +48,7 @@ Swagger UI:
 - `POST /groups`
 - `GET /groups`
 - `GET /groups/overview`
+- `GET /groups/search-users?q=dev&limit=10`
 - `GET /groups/:id`
 - `POST /groups/:id/add-member`
 - `GET /groups/:id/balances`

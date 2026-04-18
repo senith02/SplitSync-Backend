@@ -80,6 +80,49 @@ Body:
 }
 ```
 
+### GET /groups/search-users?q=dev&limit=10
+Search all registered users for add-member autocomplete.
+
+Notes:
+- works without a group ID, so it can also be used before creating a group
+- includes registered users even if they are not in any group yet
+
+Query params:
+- `q` (required): name search text, 1 to 50 characters
+- `limit` (optional): max results, 1 to 20 (default 10)
+
+Duplicate add-member error:
+
+If selected user is already in the group, `POST /groups/:id/add-member` returns:
+
+```json
+{
+  "success": false,
+  "message": "This user is already in the group"
+}
+```
+
+Example response:
+
+```json
+{
+  "success": true,
+  "count": 2,
+  "data": [
+    {
+      "id": "665f6c8f7e4f921f1d2a1234",
+      "name": "Dev Tester",
+      "email": "dev.user@splitsync.local"
+    },
+    {
+      "id": "665f6c8f7e4f921f1d2a5678",
+      "name": "Developer Milan",
+      "email": "milan.dev@splitsync.local"
+    }
+  ]
+}
+```
+
 ### GET /groups/:id/balances
 Get simplified balances only.
 
