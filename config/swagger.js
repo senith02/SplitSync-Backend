@@ -398,6 +398,24 @@ const swaggerDefinition = {
           userId: { type: 'string', example: '665f6c8f7e4f921f1d2a1234' }
         }
       },
+      GroupUserSearchResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          count: { type: 'integer', example: 2 },
+          data: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string', example: '665f6c8f7e4f921f1d2a1234' },
+                name: { type: 'string', example: 'Dev Tester' },
+                email: { type: 'string', example: 'dev.user@splitsync.local' }
+              }
+            }
+          }
+        }
+      },
       CreateExpenseRequest: {
         type: 'object',
         required: ['groupId', 'description', 'amount', 'paidBy', 'participants'],
@@ -650,6 +668,53 @@ const swaggerDefinition = {
                     data: { $ref: '#/components/schemas/Group' }
                   }
                 }
+              }
+            }
+          },
+          409: {
+            description: 'User already exists in this group',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: false },
+                    message: { type: 'string', example: 'This user is already in the group' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/groups/search-users': {
+      get: {
+        summary: 'Search registered users by name',
+        tags: ['Groups'],
+        parameters: [
+          { $ref: '#/components/parameters/AuthToken' },
+          {
+            name: 'q',
+            in: 'query',
+            required: true,
+            description: 'Case-insensitive name search text',
+            schema: { type: 'string', minLength: 1, maxLength: 50 }
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            required: false,
+            description: 'Maximum number of users to return (default 10, max 20)',
+            schema: { type: 'integer', minimum: 1, maximum: 20 }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'Matching users fetched',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/GroupUserSearchResponse' }
               }
             }
           }

@@ -6,6 +6,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const calculateBalances = require('../utils/balanceCalculator');
 
 const round = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const summarizeUserPosition = (balances, userId) => {
   let youAreOwed = 0;
@@ -236,7 +237,7 @@ const addMember = asyncHandler(async (req, res) => {
   if (alreadyMember) {
     return res.status(409).json({
       success: false,
-      message: 'User is already a member of this group'
+      message: 'This user is already in the group'
     });
   }
 
@@ -251,6 +252,34 @@ const addMember = asyncHandler(async (req, res) => {
     success: true,
     message: 'Member added successfully',
     data: updatedGroup
+  });
+});
+
+const searchUsers = asyncHandler(async (req, res) => {
+  const { q, limit = 10 } = req.query;
+
+  const normalizedLimit = Math.min(Number(limit) || 10, 20);
+  const safeSearchTerm = escapeRegex(q.trim());
+
+  const users = await User.find({
+    name: {
+      $regex: safeSearchTerm,
+      $options: 'i'
+    }
+  })
+    .select('_id name email')
+    .sort({ name: 1 })
+    .limit(normalizedLimit)
+    .lean();
+
+  return res.status(200).json({
+    success: true,
+    count: users.length,
+    data: users.map((user) => ({
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email
+    }))
   });
 });
 
@@ -308,5 +337,6 @@ module.exports = {
   getGroupsOverview,
   getGroupById,
   addMember,
+  searchUsers,
   getGroupBalances
 };

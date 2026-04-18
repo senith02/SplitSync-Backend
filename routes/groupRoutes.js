@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 
 const {
   createGroup,
@@ -7,6 +7,7 @@ const {
   getGroupsOverview,
   getGroupById,
   addMember,
+  searchUsers,
   getGroupBalances
 } = require('../controllers/groupController');
 const authMiddleware = require('../middleware/authMiddleware');
@@ -30,7 +31,24 @@ router.get('/', getGroups);
 
 router.get('/overview', getGroupsOverview);
 
-router.get('/:id', [param('id').isMongoId().withMessage('Valid group ID is required')], validateRequest, getGroupById);
+router.get(
+  '/search-users',
+  [
+    query('q')
+      .trim()
+      .notEmpty()
+      .withMessage('Search text is required')
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Search text must be between 1 and 50 characters'),
+    query('limit')
+      .optional()
+      .isInt({ min: 1, max: 20 })
+      .withMessage('Limit must be an integer between 1 and 20')
+      .toInt()
+  ],
+  validateRequest,
+  searchUsers
+);
 
 router.post(
   '/:id/add-member',
@@ -40,6 +58,13 @@ router.post(
   ],
   validateRequest,
   addMember
+);
+
+router.get(
+  '/:id',
+  [param('id').isMongoId().withMessage('Valid group ID is required')],
+  validateRequest,
+  getGroupById
 );
 
 router.get(
