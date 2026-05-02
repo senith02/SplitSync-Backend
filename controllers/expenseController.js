@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Expense = require('../models/Expense');
 const Group = require('../models/Group');
+const Settlement = require('../models/Settlement');
 const asyncHandler = require('../utils/asyncHandler');
 
 const addExpense = asyncHandler(async (req, res) => {
@@ -116,7 +117,97 @@ const getGroupExpenses = asyncHandler(async (req, res) => {
   });
 });
 
+const getExpenseDetails = asyncHandler(async (req, res) => {
+  const { expenseId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(expenseId)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid expense ID'
+    });
+  }
+
+  const expense = await Expense.findById(expenseId)
+    .populate('paidBy', 'name email')
+    .populate('participants', 'name email')
+    .populate('groupId', 'name');
+
+  if (!expense) {
+    return res.status(404).json({
+      success: false,
+      message: 'Expense not found'
+    });
+  }
+
+  const group = await Group.findById(expense.groupId);
+  const isMember = group.members.some((memberId) => memberId.toString() === req.user._id.toString());
+  if (!isMember) {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. You are not a member of this group.'
+    });
+  }
+
+  const round = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
+  
+  const totalAmount = expense.amount;
+  const participantCount = expense.participants.length;
+  const splitAmount = participantCount > 0 ? round(totalAmount / participantCount) : 0;
+
+  const expenseSettlements = await Settlement.find({ expenseId });
+  let collectedAmount = 0;
+
+  expenseSettlements.forEach(settlement => {
+    if (settlement.toUser.toString() === expense.paidBy._id.toString() && settlement.status === 'settled') {
+      collectedAmount = round(collectedAmount + settlement.amount);
+    }
+  });
+
+  let totalDebt = 0;
+  const pendingSettlements = [];
+
+  expense.participants.forEach(participant => {
+    if (participant._id.toString() !== expense.paidBy._id.toString()) {
+      // Check if this user has already paid via expenseSettlements
+      let userSettled = 0;
+      expenseSettlements.forEach(s => {
+        if (s.fromUser.toString() === participant._id.toString() && s.toUser.toString() === expense.paidBy._id.toString() && s.status === 'settled') {
+          userSettled = round(userSettled + s.amount);
+        }
+      });
+      
+      const owesNow = round(splitAmount - userSettled);
+      if (owesNow > 0) {
+        pendingSettlements.push({
+          user: participant,
+          owes: owesNow,
+          to: expense.paidBy
+        });
+        totalDebt = round(totalDebt + owesNow);
+      }
+    }
+  });
+
+  const collectedPercentage = totalAmount > splitAmount ? Math.min(round((collectedAmount / (totalAmount - splitAmount)) * 100), 100) : 100;
+
+  return res.status(200).json({
+    success: true,
+    data: {
+      expense,
+      exactDetails: {
+        totalAmount,
+        totalDebt,
+        collectedAmount,
+        collectedPercentage,
+        splitAmount,
+        pendingSettlements
+      }
+    }
+  });
+});
+
 module.exports = {
   addExpense,
-  getGroupExpenses
+  getGroupExpenses,
+  getExpenseDetails
 };

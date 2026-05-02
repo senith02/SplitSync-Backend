@@ -324,6 +324,39 @@ const swaggerDefinition = {
           data: { $ref: '#/components/schemas/Expense' }
         }
       },
+      ExpenseDetailsResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'object',
+            properties: {
+              expense: { $ref: '#/components/schemas/Expense' },
+              exactDetails: {
+                type: 'object',
+                properties: {
+                  totalAmount: { type: 'number', example: 1000 },
+                  totalDebt: { type: 'number', example: 500 },
+                  collectedAmount: { type: 'number', example: 250 },
+                  collectedPercentage: { type: 'number', example: 50 },
+                  splitAmount: { type: 'number', example: 500 },
+                  pendingSettlements: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        user: { $ref: '#/components/schemas/UserRef' },
+                        owes: { type: 'number', example: 500 },
+                        to: { $ref: '#/components/schemas/UserRef' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       ExpenseListResponse: {
         type: 'object',
         properties: {
@@ -437,6 +470,7 @@ const swaggerDefinition = {
         required: ['groupId', 'fromUser', 'toUser', 'amount'],
         properties: {
           groupId: { type: 'string', example: '665f6c8f7e4f921f1d2a1234' },
+          expenseId: { type: 'string', example: '665f6c8f7e4f921f1d2a0000', description: 'Optional. Settle a specific expense.' },
           fromUser: { type: 'string', example: '665f6c8f7e4f921f1d2a1234' },
           toUser: { type: 'string', example: '665f6c8f7e4f921f1d2a5678' },
           amount: { type: 'number', example: 500 }
@@ -766,6 +800,34 @@ const swaggerDefinition = {
               }
             }
           }
+        }
+      }
+    },
+    '/expenses/detail/{expenseId}': {
+      get: {
+        summary: 'Get exact details for a particular expense',
+        tags: ['Expenses'],
+        parameters: [
+          { $ref: '#/components/parameters/AuthToken' },
+          {
+            name: 'expenseId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'Expense exact details fetched',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ExpenseDetailsResponse' }
+              }
+            }
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' }
         }
       }
     },

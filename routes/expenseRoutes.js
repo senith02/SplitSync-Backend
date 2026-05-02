@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, param, query } = require('express-validator');
 
-const { addExpense, getGroupExpenses } = require('../controllers/expenseController');
+const { addExpense, getGroupExpenses, getExpenseDetails } = require('../controllers/expenseController');
 const authMiddleware = require('../middleware/authMiddleware');
 const validateRequest = require('../middleware/validateRequest');
 
@@ -22,6 +22,15 @@ router.post(
   ],
   validateRequest,
   addExpense
+);
+
+router.get(
+  '/detail/:expenseId',
+  [
+    param('expenseId').isMongoId().withMessage('Valid expense ID is required')
+  ],
+  validateRequest,
+  getExpenseDetails
 );
 
 router.get(
