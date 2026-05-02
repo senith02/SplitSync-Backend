@@ -4,6 +4,7 @@ const Expense = require('../models/Expense');
 const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const calculateBalances = require('../utils/balanceCalculator');
+const Settlement = require('../models/Settlement');
 
 const round = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -95,9 +96,15 @@ const getGroupsOverview = asyncHandler(async (req, res) => {
   }
 
   const groupIds = groups.map((group) => group._id);
-  const expenses = await Expense.find({ groupId: { $in: groupIds } })
-    .select('groupId amount paidBy participants')
-    .lean();
+  
+  const [expenses, settlements] = await Promise.all([
+    Expense.find({ groupId: { $in: groupIds } })
+      .select('groupId amount paidBy participants')
+      .lean(),
+    Settlement.find({ groupId: { $in: groupIds } })
+      .select('groupId fromUser toUser amount status')
+      .lean()
+  ]);
 
   const expensesByGroup = new Map();
   const totalsByGroup = new Map();
@@ -112,6 +119,14 @@ const getGroupsOverview = asyncHandler(async (req, res) => {
     totalsByGroup.set(groupId, round((totalsByGroup.get(groupId) || 0) + expense.amount));
   });
 
+  const settlementsByGroup = new Map();
+  settlements.forEach((settlement) => {
+    const groupId = settlement.groupId.toString();
+    const groupSettlements = settlementsByGroup.get(groupId) || [];
+    groupSettlements.push(settlement);
+    settlementsByGroup.set(groupId, groupSettlements);
+  });
+
   let totalGroupBalance = 0;
   let totalYouAreOwed = 0;
   let totalYouOwe = 0;
@@ -120,8 +135,9 @@ const getGroupsOverview = asyncHandler(async (req, res) => {
   const groupSummaries = groups.map((group) => {
     const groupId = group._id.toString();
     const groupExpenses = expensesByGroup.get(groupId) || [];
+    const groupSettlements = settlementsByGroup.get(groupId) || [];
 
-    const balances = calculateBalances(groupExpenses);
+    const balances = calculateBalances(groupExpenses, groupSettlements);
     const position = summarizeUserPosition(balances, userId);
 
     const groupTotalExpenses = round(totalsByGroup.get(groupId) || 0);
@@ -186,8 +202,11 @@ const getGroupById = asyncHandler(async (req, res) => {
     });
   }
 
-  const expenses = await Expense.find({ groupId: id }).populate('paidBy participants', 'name email');
-  const balances = calculateBalances(expenses);
+  const [expenses, settlements] = await Promise.all([
+    Expense.find({ groupId: id }).populate('paidBy participants', 'name email'),
+    Settlement.find({ groupId: id })
+  ]);
+  const balances = calculateBalances(expenses, settlements);
 
   return res.status(200).json({
     success: true,
@@ -309,8 +328,11 @@ const getGroupBalances = asyncHandler(async (req, res) => {
     });
   }
 
-  const expenses = await Expense.find({ groupId: id }).populate('paidBy participants', 'name email');
-  const rawBalances = calculateBalances(expenses);
+  const [expenses, settlements] = await Promise.all([
+    Expense.find({ groupId: id }).populate('paidBy participants', 'name email'),
+    Settlement.find({ groupId: id })
+  ]);
+  const rawBalances = calculateBalances(expenses, settlements);
 
   const userMap = new Map(group.members.map((member) => [member._id.toString(), member]));
   const balances = rawBalances.map((item) => ({
