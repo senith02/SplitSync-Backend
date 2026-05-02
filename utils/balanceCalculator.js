@@ -1,6 +1,6 @@
 const round = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
 
-const calculateBalances = (expenses) => {
+const calculateBalances = (expenses, settlements = []) => {
   const net = new Map();
 
   expenses.forEach((expense) => {
@@ -18,6 +18,18 @@ const calculateBalances = (expenses) => {
     participants.forEach((participantId) => {
       net.set(participantId, round((net.get(participantId) || 0) - share));
     });
+  });
+
+  settlements.forEach((settlement) => {
+    if (settlement.status !== 'settled') return;
+    
+    const fromUser = settlement.fromUser._id ? settlement.fromUser._id.toString() : settlement.fromUser.toString();
+    const toUser = settlement.toUser._id ? settlement.toUser._id.toString() : settlement.toUser.toString();
+    
+    // fromUser pays toUser, meaning fromUser's net balance increases (they owe less),
+    // and toUser's net balance decreases (they are owed less)
+    net.set(fromUser, round((net.get(fromUser) || 0) + settlement.amount));
+    net.set(toUser, round((net.get(toUser) || 0) - settlement.amount));
   });
 
   const debtors = [];

@@ -113,11 +113,22 @@ const getDashboardOverview = asyncHandler(async (req, res) => {
     groupExpenses.set(key, items);
   });
 
+  const groupSettlements = new Map();
+  settlements.forEach((settlement) => {
+    const key = settlement.groupId.toString();
+    const items = groupSettlements.get(key) || [];
+    items.push(settlement);
+    groupSettlements.set(key, items);
+  });
+
   let youAreOwed = 0;
   let youOwe = 0;
 
   groups.forEach((group) => {
-    const balances = calculateBalances(groupExpenses.get(group._id.toString()) || []);
+    const balances = calculateBalances(
+      groupExpenses.get(group._id.toString()) || [],
+      groupSettlements.get(group._id.toString()) || []
+    );
     const position = summarizeUserPosition(balances, userId);
     youAreOwed = round(youAreOwed + position.youAreOwed);
     youOwe = round(youOwe + position.youOwe);
