@@ -4,7 +4,7 @@ const Group = require('../models/Group');
 const asyncHandler = require('../utils/asyncHandler');
 
 const settlePayment = asyncHandler(async (req, res) => {
-  const { groupId, fromUser, toUser, amount } = req.body;
+  const { groupId, expenseId, fromUser, toUser, amount } = req.body;
 
   if (
     !mongoose.Types.ObjectId.isValid(groupId) ||
@@ -14,6 +14,13 @@ const settlePayment = asyncHandler(async (req, res) => {
     return res.status(400).json({
       success: false,
       message: 'Invalid group or user IDs'
+    });
+  }
+
+  if (expenseId && !mongoose.Types.ObjectId.isValid(expenseId)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid expense ID'
     });
   }
 
@@ -53,6 +60,7 @@ const settlePayment = asyncHandler(async (req, res) => {
 
   const settlement = await Settlement.create({
     groupId,
+    expenseId: expenseId || undefined,
     fromUser,
     toUser,
     amount,

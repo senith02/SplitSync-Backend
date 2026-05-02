@@ -7,6 +7,11 @@ const settlementSchema = new mongoose.Schema(
       ref: 'Group',
       required: true
     },
+    expenseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Expense',
+      required: false
+    },
     fromUser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
